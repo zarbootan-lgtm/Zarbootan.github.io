@@ -3,50 +3,61 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#211b17">
 <title>Véhicules abandonnés</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Fraunces:wght@600&display=swap">
 <style>
-:root{--bg:#f2f5f8;--card:#fff;--ink:#14212b;--mut:#51606c;--line:#c9d3dc;--pri:#0b4f8a;--onpri:#fff;--acc:#c2410c;--ok:#1b7a3d;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1a23;--card:#182632;--ink:#eaf1f6;--mut:#a3b3c0;--line:#2c3e4c;--pri:#5aa9ee;--onpri:#06121c;--acc:#ff9a5c;--ok:#5ccf8a}}
-:root[data-theme="dark"]{--bg:#0f1a23;--card:#182632;--ink:#eaf1f6;--mut:#a3b3c0;--line:#2c3e4c;--pri:#5aa9ee;--onpri:#06121c;--acc:#ff9a5c;--ok:#5ccf8a}
+:root{--bg:#f6f4f1;--card:#fff;--ink:#1c1917;--mut:#6b625b;--line:#e4ded7;--field:#fff;--pri:#e8590c;--pri2:#c2410c;--onpri:#fff;--acc:#c2410c;--ok:#1b7a3d;--bad:#b42318;--me:#2563eb;--hero1:#211b17;--hero2:#3a2a1f;--shadow:0 1px 2px rgba(28,25,23,.06),0 10px 28px rgba(28,25,23,.07);box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#141110;--card:#1f1a17;--ink:#f5f1ed;--mut:#a89f97;--line:#352e29;--field:#171311;--pri:#ff7a2e;--pri2:#e8590c;--onpri:#1a0f08;--acc:#ff8f4d;--ok:#5ccf8a;--bad:#ff8a80;--me:#7db3ff;--hero1:#2a211b;--hero2:#46301f;--shadow:0 1px 2px rgba(0,0,0,.4),0 10px 28px rgba(0,0,0,.35)}}
+:root[data-theme="dark"]{--bg:#141110;--card:#1f1a17;--ink:#f5f1ed;--mut:#a89f97;--line:#352e29;--field:#171311;--pri:#ff7a2e;--pri2:#e8590c;--onpri:#1a0f08;--acc:#ff8f4d;--ok:#5ccf8a;--bad:#ff8a80;--me:#7db3ff;--hero1:#2a211b;--hero2:#46301f;--shadow:0 1px 2px rgba(0,0,0,.4),0 10px 28px rgba(0,0,0,.35)}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font:18px/1.45 "Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
 .wrap{max-width:640px;margin:0 auto;padding:16px}
-h1{font-size:1.5rem;margin:4px 0 2px}
-.sub{color:var(--mut);margin:0 0 14px}
-nav{display:flex;gap:6px;margin-bottom:14px}
-nav button{flex:1;min-height:52px;border:2px solid var(--line);background:var(--card);color:var(--ink);border-radius:12px;font:inherit;font-size:16px;font-weight:700;padding:0 4px}
-nav button[aria-selected="true"]{background:var(--pri);color:var(--onpri);border-color:var(--pri)}
-.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:12px}
-label{display:block;font-weight:700;margin:12px 0 4px}
-input,select,textarea{width:100%;min-height:50px;padding:10px 12px;border:2px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit}
+.hero{position:relative;overflow:hidden;background:linear-gradient(135deg,var(--hero1),var(--hero2));color:#fff;border-radius:22px;padding:20px;margin:4px 0 14px;box-shadow:var(--shadow)}
+.hero:after{content:"";position:absolute;right:-34px;top:-34px;width:150px;height:150px;border-radius:50%;background:radial-gradient(circle,rgba(255,122,46,.6),transparent 70%)}
+.kick{position:relative;z-index:1;margin:0 0 4px;color:#ffb27d;font-weight:700;font-size:.8rem;letter-spacing:.14em;text-transform:uppercase}
+.hero h1{position:relative;z-index:1;font-family:Fraunces,Georgia,serif;font-weight:600;font-size:1.75rem;line-height:1.15;margin:0 0 8px;color:#fff}
+.sub{position:relative;z-index:1;color:#eadfd5;margin:0}
+nav{display:flex;gap:4px;background:var(--card);padding:5px;border-radius:16px;box-shadow:var(--shadow);margin-bottom:14px}
+nav button{flex:1;min-height:48px;border:0;background:transparent;color:var(--mut);border-radius:12px;font:inherit;font-size:16px;font-weight:700;padding:0 4px}
+nav button[aria-selected="true"]{background:linear-gradient(135deg,var(--pri),var(--pri2));color:var(--onpri);box-shadow:0 6px 14px rgba(232,89,12,.3)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:14px;box-shadow:var(--shadow)}
+label{display:block;font-weight:700;margin:14px 0 5px}
+input,select,textarea{width:100%;min-height:52px;padding:10px 14px;border:1.5px solid var(--line);border-radius:12px;background:var(--field);color:var(--ink);font:inherit}
 textarea{min-height:110px}
-.hint{color:var(--mut);font-size:.9rem;margin:4px 0 0}
-.btn{display:block;width:100%;min-height:54px;margin-top:12px;border:2px solid var(--pri);background:var(--pri);color:var(--onpri);border-radius:12px;font:inherit;font-weight:700;text-align:center;text-decoration:none;padding:12px}
-.btn.alt{background:transparent;color:var(--pri)}
-.btn.danger{background:transparent;border-color:var(--acc);color:var(--acc);min-height:46px}
-button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,a:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
-#prev{width:100%;max-height:260px;object-fit:cover;border-radius:10px;margin-top:10px}
+.hint{color:var(--mut);font-size:.9rem;margin:5px 0 0}
+.btn{display:flex;align-items:center;justify-content:center;width:100%;min-height:54px;margin-top:12px;border:0;background:linear-gradient(135deg,var(--pri),var(--pri2));color:var(--onpri);border-radius:14px;font:inherit;font-weight:700;text-align:center;text-decoration:none;padding:12px;box-shadow:0 8px 18px rgba(232,89,12,.28);cursor:pointer}
+.btn:active{transform:translateY(1px)}
+.btn.alt{background:transparent;color:var(--acc);border:2px solid var(--pri);box-shadow:none}
+.btn.danger{background:transparent;color:var(--bad);border:2px solid var(--bad);box-shadow:none;min-height:46px}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,a:focus-visible,label.btn:focus-within{outline:3px solid var(--pri);outline-offset:2px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.two .btn{margin-top:0;font-size:16px}
+.vh{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+#prev{width:100%;max-height:260px;object-fit:cover;border-radius:14px;margin-top:12px}
 .msg{font-weight:700;color:var(--ok);margin-top:8px}
-.err{color:var(--acc)}
-.big{font-size:2.6rem;font-weight:700;line-height:1.1;color:var(--pri)}
+.err{color:var(--bad)}
+.big{font-size:2.6rem;font-weight:700;line-height:1.1;color:var(--acc)}
 .item{display:flex;gap:12px}
-.item img{width:84px;height:84px;object-fit:cover;border-radius:8px;flex:none}
-.item .ph{width:84px;height:84px;border-radius:8px;background:var(--bg);border:1px dashed var(--line);flex:none;display:grid;place-items:center;color:var(--mut);font-size:.8rem;text-align:center}
+.item img{width:84px;height:84px;object-fit:cover;border-radius:12px;flex:none}
+.item .ph{width:84px;height:84px;border-radius:12px;background:var(--bg);border:1px dashed var(--line);flex:none;display:grid;place-items:center;color:var(--mut);font-size:.8rem;text-align:center}
 .item b{display:block}
-.item a{color:var(--pri);font-weight:700}
-svg#svg{width:100%;height:auto;background:var(--bg);border:1px solid var(--line);border-radius:12px}
-.badge{display:inline-block;padding:2px 8px;border-radius:8px;border:2px solid var(--acc);color:var(--acc);font-weight:700;font-size:.85rem}
+.item a{color:var(--acc);font-weight:700}
+.item select{min-height:46px;margin-top:8px}
+.item .btn{margin-top:8px;font-size:16px}
+.sel{display:flex;align-items:center;gap:10px;font-weight:700;margin:10px 0 0}
+.sel input{width:26px;height:26px;min-height:0;padding:0;accent-color:var(--pri);flex:none}
+.badge{display:inline-block;padding:2px 10px;border-radius:999px;border:2px solid var(--acc);color:var(--acc);font-weight:700;font-size:.85rem}
 .badge.ok{border-color:var(--ok);color:var(--ok)}
-.item select{min-height:44px;margin-top:6px}
+svg#svg{width:100%;height:auto;background:var(--bg);border:1px solid var(--line);border-radius:14px}
 [hidden]{display:none!important}
 </style>
 </head>
 <body>
 <div class="wrap">
-<h1>Véhicules abandonnés</h1>
-<p class="sub" id="count">Aucun véhicule noté pour l’instant.</p>
+<header class="hero"><p class="kick">Répertoire des signalements</p><h1>Véhicules abandonnés</h1>
+<p class="sub" id="count">Aucun véhicule noté pour l’instant.</p></header>
 <nav role="tablist">
 <button data-t="new" aria-selected="true">Signaler</button>
 <button data-t="list" aria-selected="false">Ma liste</button>
@@ -56,11 +67,16 @@ svg#svg{width:100%;height:auto;background:var(--bg);border:1px solid var(--line)
 
 <section id="new">
 <div class="card">
-<label for="photo" style="margin-top:0">1. Photo du véhicule</label>
-<input id="photo" type="file" accept="image/*" capture="environment">
+<p class="badge" id="editban" hidden>Modification d’une fiche</p>
+<label style="margin-top:0">1. Photo du véhicule</label>
+<div class="two"><label class="btn" for="photocam">Prendre une photo</label><label class="btn alt" for="photo">Choisir dans la photothèque</label></div>
+<input id="photocam" class="vh" type="file" accept="image/*" capture="environment">
+<input id="photo" class="vh" type="file" accept="image/*">
+<p class="hint">Photothèque : touchez « Options » et activez « Position » pour lire la position dans la photo.</p>
 <img id="prev" alt="Aperçu de la photo" hidden>
 <label>2. Lieu (GPS)</label>
 <button class="btn alt" id="gpsbtn" type="button" style="margin-top:0">Relever ma position</button>
+<p class="hint" id="live">GPS : démarrage…</p>
 <p class="hint" id="gpsmsg">La position est relevée automatiquement après la photo. Autorisez la localisation si l’iPhone le demande.</p>
 <label for="manu">Coordonnées (remplies automatiquement, ou à coller)</label>
 <input id="manu" placeholder="-21.11500, 55.53600">
@@ -76,18 +92,26 @@ svg#svg{width:100%;height:auto;background:var(--bg);border:1px solid var(--line)
 <p class="hint">Elle sert uniquement à transmettre le signalement à la mairie.</p>
 <label for="etat">État du véhicule</label>
 <select id="etat"><option>Épave</option><option>Roues ou vitres manquantes</option><option>Intact mais semble abandonné</option><option>Brûlé</option></select>
+<label for="quartier">Quartier ou commune</label>
+<input id="quartier" placeholder="Exemple : Bellepierre, Saint-Denis">
 <label for="lieu">Adresse ou nom du lieu</label>
 <input id="lieu" placeholder="Exemple : parking de la place du marché">
 <label for="notes">Remarques</label>
 <textarea id="notes"></textarea>
 <button class="btn" id="save" type="button">Enregistrer ce véhicule</button>
+<button class="btn alt" id="cancel" type="button" hidden>Annuler la modification</button>
 <p class="msg" id="savemsg" role="status"></p>
 </div>
 </section>
 
 <section id="list" hidden>
+<label for="sort" style="margin-top:0">Trier par</label>
+<select id="sort"><option value="recent">Plus récents d’abord</option><option value="ancien">Plus anciens d’abord</option><option value="quartier">Quartier (A à Z)</option><option value="lieu">Adresse ou lieu (A à Z)</option><option value="type">Type de véhicule</option></select>
+<div class="two" style="margin:12px 0"><button class="btn alt" id="pickall" type="button">Tout choisir</button><button class="btn alt" id="pickno" type="button">Ne rien choisir</button></div>
 <div id="items"></div>
 <button class="btn" id="repall" type="button">Préparer le signalement pour la mairie</button>
+<button class="btn alt" id="csv" type="button">Exporter la liste (tableur)</button>
+<p class="msg" id="csvmsg" role="status"></p>
 <div class="card" style="margin-top:12px"><b>Sauvegarde</b>
 <p class="hint" id="bkhint">Enregistrez un fichier pour conserver vos véhicules, photos comprises.</p>
 <button class="btn alt" id="bksave" type="button">Enregistrer une sauvegarde</button>
@@ -126,7 +150,7 @@ svg#svg{width:100%;height:auto;background:var(--bg);border:1px solid var(--line)
 <section id="out" class="card" hidden>
 <label for="txt" style="margin-top:0">Message pour la mairie</label>
 <textarea id="txt" style="min-height:260px"></textarea>
-<p class="hint">Vous pouvez le modifier. Joignez les photos depuis votre téléphone.</p>
+<p class="hint">Vous pouvez modifier le texte avant l’envoi.</p>
 <button class="btn" id="copy" type="button">Copier le message</button>
 <a class="btn alt" id="mail" target="_blank" rel="noopener">Ouvrir dans ma messagerie</a>
 <button class="btn alt" id="share" type="button" hidden>Partager</button>
@@ -150,42 +174,58 @@ function put(o){const m=()=>{mem=mem.filter(x=>x.id!==o.id);mem.push(o)};return 
 function del(id){mem=mem.filter(x=>x.id!==id);if(db){try{db.transaction("r","readwrite").objectStore("r").delete(id)}catch(e){}}}
 
 /* Onglets */
-function show(t){["new","list","rad","map"].forEach(k=>$("#"+k).hidden=k!==t);document.querySelectorAll("nav button").forEach(b=>b.setAttribute("aria-selected",b.dataset.t===t));$("#out").hidden=true;if(t==="map")drawMap()}
+function show(t){["new","list","rad","map"].forEach(k=>$("#"+k).hidden=k!==t);document.querySelectorAll("nav button").forEach(b=>b.setAttribute("aria-selected",b.dataset.t===t));$("#out").hidden=true;if(t==="map")drawMap();if(t==="new")startWatch();else stopWatch()}
 document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>show(b.dataset.t));
 
 /* Position GPS */
-function pos(){return new Promise((ok,ko)=>{if(!navigator.geolocation)return ko(new Error("Le GPS n’est pas disponible sur cet appareil."));navigator.geolocation.getCurrentPosition(p=>ok(p.coords),e=>ko(new Error(e.code===1?"Autorisez la localisation pour ce site (Réglages, Safari, Localisation), puis réessayez. Vous pouvez aussi saisir les coordonnées ci-dessous.":"Position introuvable. Essayez en extérieur.")),{enableHighAccuracy:true,timeout:15000,maximumAge:0})})}
+function pos(){return new Promise((ok,ko)=>{if(!navigator.geolocation)return ko(new Error("Le GPS n’est pas disponible sur cet appareil."));navigator.geolocation.getCurrentPosition(p=>ok(p.coords),e=>ko(new Error(e.code===1?"Autorisez la localisation pour ce site (Réglages de l’iPhone, votre navigateur, Position), puis réessayez. Vous pouvez aussi saisir les coordonnées ci-dessous.":"Position introuvable. Essayez en extérieur.")),{enableHighAccuracy:true,timeout:15000,maximumAge:0})})}
 function setPos(la,lo,src,acc){cur.lat=la;cur.lon=lo;cur.acc=acc||null;if(src!=="saisie")$("#manu").value=la.toFixed(5)+", "+lo.toFixed(5);const m=$("#gpsmsg");m.classList.remove("err");m.textContent="Position "+src+" : "+la.toFixed(5)+", "+lo.toFixed(5)+(acc?" (précision "+acc+" m)":"")}
-async function gps(){const m=$("#gpsmsg");m.classList.remove("err");m.textContent="Recherche de la position…";try{const c=await pos();setPos(c.latitude,c.longitude,"relevée",Math.round(c.accuracy))}catch(e){m.classList.add("err");m.textContent=e.message}}
+async function gps(){const m=$("#gpsmsg");m.classList.remove("err");if(wid!=null&&last&&Date.now()-last.t<600000){setPos(last.lat,last.lon,"relevée",last.acc);return}m.textContent="Recherche de la position…";try{const c=await pos();setPos(c.latitude,c.longitude,"relevée",Math.round(c.accuracy))}catch(e){m.classList.add("err");m.textContent=e.message}}
 function noPos(){const m=$("#gpsmsg");m.classList.add("err");m.textContent="Aucune position dans cette photo. Dans la Photothèque, touchez « Options » et activez « Position », ou saisissez les coordonnées ci-dessous."}
 $("#gpsbtn").onclick=gps;
+/* GPS en avance : la position est suivie pendant que l’onglet Signaler est ouvert */
+let last=null,wid=null;
+function liveMsg(t,bad){const l=$("#live");l.textContent=t;l.classList.toggle("err",!!bad)}
+function startWatch(){if(wid!=null)return;if(!navigator.geolocation){liveMsg("GPS indisponible sur cet appareil.",true);return}try{wid=navigator.geolocation.watchPosition(p=>{last={lat:p.coords.latitude,lon:p.coords.longitude,acc:Math.round(p.coords.accuracy),t:Date.now()};liveMsg("GPS prêt (précision "+last.acc+" m).")},e=>{if(e.code===1)last=null;liveMsg(e.code===1?"GPS refusé : autorisez la localisation pour ce site (Réglages de l’iPhone, votre navigateur, Position).":"GPS : position introuvable pour l’instant.",true)},{enableHighAccuracy:true,maximumAge:10000,timeout:30000})}catch(x){}}
+function stopWatch(){if(wid!=null){try{navigator.geolocation.clearWatch(wid)}catch(x){}wid=null}}
 /* Position lue dans la photo (EXIF) et coordonnées saisies */
 async function readExif(f){try{const b=await f.slice(0,262144).arrayBuffer(),v=new DataView(b);if(v.getUint16(0)!==0xFFD8)return null;let o=2;while(o<v.byteLength-4){const mk=v.getUint16(o),len=v.getUint16(o+2);if(mk===0xFFE1&&v.getUint32(o+4)===0x45786966){const t=o+10,le=v.getUint16(t)===0x4949,u16=p=>v.getUint16(p,le),u32=p=>v.getUint32(p,le),ifd=p=>{const n=u16(p),r={};for(let i=0;i<n;i++){const e=p+2+i*12;r[u16(e)]={v:e+8}}return r},i0=ifd(t+u32(t+4));if(!i0[0x8825])return null;const g=ifd(t+u32(i0[0x8825].v));if(!g[2]||!g[4])return null;const rat=e=>{const a=t+u32(e.v);return[0,1,2].map(k=>u32(a+k*8)/u32(a+k*8+4))},ref=e=>String.fromCharCode(v.getUint8(e.v)),dg=a=>a[0]+a[1]/60+a[2]/3600;let la=dg(rat(g[2])),lo=dg(rat(g[4]));if(g[1]&&ref(g[1])==="S")la=-la;if(g[3]&&ref(g[3])==="W")lo=-lo;return isFinite(la)&&isFinite(lo)&&(la||lo)?{lat:la,lon:lo}:null}o+=2+len}return null}catch(e){return null}}
 const parseLL=s=>{const m=String(s).match(/(-?\d{1,3}\.\d+)\s*[,;\s\/]+\s*(-?\d{1,3}\.\d+)/);if(!m)return null;const a=+m[1],b=+m[2];return Math.abs(a)<=90&&Math.abs(b)<=180?[a,b]:null};
 $("#manu").oninput=()=>{const p=parseLL($("#manu").value);if(p)setPos(p[0],p[1],"saisie")};
 
 /* Photo réduite pour économiser la mémoire */
-$("#photo").onchange=e=>{const f=e.target.files[0];if(!f)return;const m=$("#gpsmsg"),sm=$("#savemsg");m.classList.remove("err");sm.textContent="";m.textContent="Photo reçue ("+Math.round(f.size/1024)+" Ko), analyse en cours…";
-readExif(f).then(p=>p?setPos(p.lat,p.lon,"lue dans la photo"):gps());
+const onPhoto=e=>{const f=e.target.files[0];if(!f)return;const m=$("#gpsmsg"),sm=$("#savemsg");m.classList.remove("err");sm.textContent="";m.textContent=editId?"Nouvelle photo reçue. La position de la fiche est conservée.":"Photo reçue ("+Math.round(f.size/1024)+" Ko), analyse en cours…";
+if(!editId)readExif(f).then(p=>p?setPos(p.lat,p.lon,"lue dans la photo"):(e.target.id==="photocam"?gps():noPos()));
 const u=URL.createObjectURL(f),img=new Image(),bad=()=>{cur.photo=null;sm.classList.add("err");sm.textContent="La photo n’a pas pu être réduite : elle ne sera pas enregistrée."};$("#prev").src=u;$("#prev").hidden=false;
 img.onload=()=>{try{const s=Math.min(1,900/Math.max(img.width,img.height)),c=document.createElement("canvas");c.width=Math.round(img.width*s);c.height=Math.round(img.height*s);c.getContext("2d").drawImage(img,0,0,c.width,c.height);cur.photo=c.toDataURL("image/jpeg",.7);$("#prev").src=cur.photo}catch(x){bad()}};
 img.onerror=bad;img.src=u};
+$("#photo").onchange=onPhoto;$("#photocam").onchange=onPhoto;
 
 /* Enregistrer */
-$("#save").onclick=async()=>{const m=$("#savemsg");m.classList.remove("err");if(cur.lat==null&&!$("#lieu").value.trim()){m.classList.add("err");m.textContent="Indiquez au moins une position ou une adresse.";return}
-const o={id:Date.now(),date:new Date().toISOString(),photo:cur.photo,lat:cur.lat,lon:cur.lon,acc:cur.acc,type:$("#type").value,marque:$("#marque").value.trim(),couleur:$("#couleur").value.trim(),plaque:$("#plaque").value.trim().toUpperCase(),etat:$("#etat").value,lieu:$("#lieu").value.trim(),notes:$("#notes").value.trim()};
-await put(o);cur={photo:null,lat:null,lon:null,acc:null};["photo","marque","couleur","plaque","lieu","notes","manu"].forEach(k=>$("#"+k).value="");$("#prev").hidden=true;$("#gpsmsg").textContent="La position est relevée automatiquement après la photo. Autorisez la localisation si l’iPhone le demande.";m.textContent="Véhicule enregistré.";await refresh()};
+let editId=null;
+const FIELDS=["marque","couleur","plaque","quartier","lieu","notes"];
+function resetForm(){cur={photo:null,lat:null,lon:null,acc:null};editId=null;["photo","photocam","manu"].concat(FIELDS).forEach(k=>$("#"+k).value="");$("#type").selectedIndex=0;$("#etat").selectedIndex=0;$("#prev").hidden=true;$("#editban").hidden=true;$("#cancel").hidden=true;$("#save").textContent="Enregistrer ce véhicule";$("#gpsmsg").classList.remove("err");$("#gpsmsg").textContent="La position est relevée automatiquement après la photo. Autorisez la localisation si l’iPhone le demande."}
+function startEdit(id){const o=recs.find(v=>v.id===id);if(!o)return;resetForm();editId=id;cur={photo:o.photo||null,lat:o.lat,lon:o.lon,acc:o.acc};$("#type").value=o.type;$("#etat").value=o.etat;FIELDS.forEach(k=>$("#"+k).value=o[k]||"");$("#manu").value=o.lat==null?"":o.lat.toFixed(5)+", "+o.lon.toFixed(5);if(o.photo){$("#prev").src=o.photo;$("#prev").hidden=false}$("#gpsmsg").textContent=o.lat==null?"Aucune position enregistrée. Relevez-la ou saisissez des coordonnées.":"Position enregistrée. Vous pouvez la modifier ci-dessous.";$("#editban").hidden=false;$("#cancel").hidden=false;$("#save").textContent="Enregistrer les modifications";$("#savemsg").textContent="";show("new");window.scrollTo({top:0,behavior:"smooth"})}
+$("#cancel").onclick=()=>{resetForm();$("#savemsg").textContent="";show("list")};
+$("#save").onclick=async()=>{const m=$("#savemsg");m.classList.remove("err");if(cur.lat==null&&!$("#lieu").value.trim()&&!$("#quartier").value.trim()){m.classList.add("err");m.textContent="Indiquez au moins une position ou une adresse.";return}
+const old=editId?recs.find(v=>v.id===editId):null,o=Object.assign({},old||{},{id:old?old.id:Date.now(),date:old?old.date:new Date().toISOString(),photo:cur.photo,lat:cur.lat,lon:cur.lon,acc:cur.acc,type:$("#type").value,etat:$("#etat").value});FIELDS.forEach(k=>o[k]=$("#"+k).value.trim());o.plaque=o.plaque.toUpperCase();
+await put(o);const was=!!old;resetForm();m.textContent=was?"Modifications enregistrées.":"Véhicule enregistré.";await refresh();if(was)show("list")};
 
 /* Affichage */
 const st=o=>o.statut||"present",on=o=>st(o)==="present",LBL={present:"Toujours sur place",mairie:"Enlevé par la mairie",proprio:"Enlevé par le propriétaire"};
 const badge=o=>`<span class="badge${on(o)?"":" ok"}">${LBL[st(o)]}</span>`;
-const card=(o,extra)=>`<div class="card item">${o.photo?`<img src="${o.photo}" alt="Photo du véhicule">`:`<div class="ph">Pas de photo</div>`}<div><b>${esc(o.type)}${o.marque?", "+esc(o.marque):""}${o.couleur?", "+esc(o.couleur):""}</b>${o.plaque?"Plaque : "+esc(o.plaque):"Plaque non visible"}<br>${esc(o.etat)}<br>${badge(o)}<br>${o.lieu?esc(o.lieu)+"<br>":""}Repéré le ${fr(o.date)}<br>${extra||""}${o.lat==null?"Position non relevée":`<a href="https://www.google.com/maps?q=${o.lat},${o.lon}" target="_blank" rel="noopener">Voir sur la carte</a>`}${extra===undefined?`<br><select data-st="${o.id}" aria-label="Situation du véhicule">${Object.keys(LBL).map(k=>`<option value="${k}"${st(o)===k?" selected":""}>${LBL[k]}</option>`).join("")}</select><br><button class="btn danger" data-del="${o.id}" type="button">Supprimer de la liste</button>`:""}</div></div>`;
-async function refresh(){recs=(await getAll()).slice().sort((a,b)=>on(b)-on(a)||b.id-a.id);const n=recs.length;const p=recs.filter(on).length,x=n-p;$("#count").textContent=n?p+(p>1?" véhicules":" véhicule")+" encore sur place"+(x?", "+x+(x>1?" enlevés.":" enlevé."):"."):"Aucun véhicule noté pour l’instant.";
-$("#items").innerHTML=n?recs.map(o=>card(o)).join(""):`<div class="card">Votre liste est vide. Utilisez l’onglet « Signaler » pour ajouter un véhicule.</div>`;$("#repall").hidden=!p;
+const card=(o,extra)=>`<div class="card item">${o.photo?`<img src="${o.photo}" alt="Photo du véhicule">`:`<div class="ph">Pas de photo</div>`}<div><b>${esc(o.type)}${o.marque?", "+esc(o.marque):""}${o.couleur?", "+esc(o.couleur):""}</b>${o.plaque?"Plaque : "+esc(o.plaque):"Plaque non visible"}<br>${esc(o.etat)}<br>${badge(o)}<br>${o.quartier||o.lieu?esc([o.quartier,o.lieu].filter(Boolean).join(", "))+"<br>":""}Repéré le ${fr(o.date)}<br>${extra||""}${o.lat==null?"Position non relevée":`<a href="https://www.google.com/maps?q=${o.lat},${o.lon}" target="_blank" rel="noopener">Voir sur la carte</a>`}${extra===undefined?`${on(o)?`<br><label class="sel"><input type="checkbox" data-pick="${o.id}"${picked.has(o.id)?" checked":""}> Choisir pour le signalement</label>`:""}<br><button class="btn alt" data-edit="${o.id}" type="button">Modifier la fiche</button>${o.photo&&on(o)?`<br><button class="btn" data-send="${o.id}" type="button">Envoyer cette fiche avec la photo</button>`:""}<br><select data-st="${o.id}" aria-label="Situation du véhicule">${Object.keys(LBL).map(k=>`<option value="${k}"${st(o)===k?" selected":""}>${LBL[k]}</option>`).join("")}</select><br><button class="btn danger" data-del="${o.id}" type="button">Supprimer de la liste</button>`:""}</div></div>`;
+const txt=(a,b)=>!a&&b?1:a&&!b?-1:String(a||"").localeCompare(String(b||""),"fr",{sensitivity:"base"});
+let picked=new Set();
+const updRep=()=>{$("#repall").textContent=picked.size?"Préparer le signalement ("+picked.size+" choisi"+(picked.size>1?"s":"")+", sans photos)":"Préparer le signalement pour tous les véhicules sur place"};
+const cmp=(a,b)=>{const k=$("#sort").value,r=on(b)-on(a);if(r)return r;if(k==="ancien")return a.id-b.id;if(k==="quartier")return txt(a.quartier,b.quartier)||b.id-a.id;if(k==="lieu")return txt(a.lieu,b.lieu)||b.id-a.id;if(k==="type")return txt(a.type,b.type)||b.id-a.id;return b.id-a.id};
+$("#sort").onchange=()=>refresh();
+async function refresh(){recs=(await getAll()).slice().sort(cmp);const n=recs.length;const p=recs.filter(on).length,x=n-p;$("#count").textContent=n?p+(p>1?" véhicules":" véhicule")+" encore sur place"+(x?", "+x+(x>1?" enlevés.":" enlevé."):"."):"Aucun véhicule noté pour l’instant.";
+$("#items").innerHTML=n?recs.map(o=>card(o)).join(""):`<div class="card">Votre liste est vide. Utilisez l’onglet « Signaler » pour ajouter un véhicule.</div>`;$("#repall").hidden=!p;picked=new Set([...picked].filter(id=>recs.some(o=>o.id===id&&on(o))));updRep();
 $("#centre").innerHTML=`<option value="me">Ma position actuelle</option>`+recs.filter(o=>o.lat!=null).map(o=>`<option value="${o.id}">${esc(o.type)} ${esc(o.lieu||fr(o.date))}</option>`).join("")}
-$("#items").onclick=async e=>{const id=e.target.dataset.del;if(!id)return;if(e.target.dataset.ok){del(+id);await refresh()}else{e.target.dataset.ok=1;e.target.textContent="Confirmer la suppression"}};
+$("#items").onclick=async e=>{if(e.target.dataset.edit){startEdit(+e.target.dataset.edit);return}if(e.target.dataset.send){const o=recs.find(v=>v.id===+e.target.dataset.send);if(o)prep([o],o);return}const id=e.target.dataset.del;if(!id)return;if(e.target.dataset.ok){del(+id);await refresh()}else{e.target.dataset.ok=1;e.target.textContent="Confirmer la suppression"}};
 
-$("#items").onchange=async e=>{const id=e.target.dataset.st;if(!id)return;const o=recs.find(v=>v.id===+id);if(!o)return;o.statut=e.target.value;o.finDate=on(o)?null:new Date().toISOString();await put(o);await refresh()};
+$("#items").onchange=async e=>{if(e.target.dataset.pick){const k=+e.target.dataset.pick;if(e.target.checked)picked.add(k);else picked.delete(k);updRep();return}const id=e.target.dataset.st;if(!id)return;const o=recs.find(v=>v.id===+id);if(!o)return;o.statut=e.target.value;o.finDate=on(o)?null:new Date().toISOString();await put(o);await refresh()};
 
 /* Comptage dans un rayon */
 $("#go").onclick=async()=>{const m=$("#radmsg");m.textContent="";const R=+$("#r").value;if(!(R>0)){m.textContent="Indiquez un rayon en mètres.";return}let c;
@@ -196,14 +236,16 @@ $("#res").hidden=false;$("#n").textContent=found.length;$("#nl").textContent=(fo
 $("#ritems").innerHTML=found.map(x=>card(x.o,"À "+Math.round(x.d)+" m<br>")).join("");$("#repr").hidden=!found.length};
 
 /* Message pour la mairie */
-function report(l){const t=l.map((o,i)=>`${i+1}. ${o.type}${o.marque?" "+o.marque:""}${o.couleur?", "+o.couleur:""}\n   Immatriculation : ${o.plaque||"non visible"}\n   État : ${o.etat}\n   Lieu : ${o.lieu||"non précisé"}${o.lat==null?"":`\n   Position GPS : ${o.lat.toFixed(5)}, ${o.lon.toFixed(5)}\n   Carte : https://www.google.com/maps?q=${o.lat.toFixed(5)},${o.lon.toFixed(5)}`}\n   Repéré le ${fr(o.date)}${o.notes?"\n   Remarques : "+o.notes:""}`).join("\n\n");
-return `Bonjour,\n\nJe vous signale ${l.length>1?"les véhicules suivants, qui semblent abandonnés":"le véhicule suivant, qui semble abandonné"} sur la voie publique :\n\n${t}\n\nJe peux fournir des photos sur demande.\n\nCordialement`}
-function prep(l){const s=report(l);$("#txt").value=s;$("#out").hidden=false;$("#outmsg").textContent="";upd();$("#out").scrollIntoView({behavior:"smooth"})}
+function report(l,one){const t=l.map((o,i)=>`${i+1}. ${o.type}${o.marque?" "+o.marque:""}${o.couleur?", "+o.couleur:""}\n   Immatriculation : ${o.plaque||"non visible"}\n   État : ${o.etat}\n   Lieu : ${[o.quartier,o.lieu].filter(Boolean).join(", ")||"non précisé"}${o.lat==null?"":`\n   Position GPS : ${o.lat.toFixed(5)}, ${o.lon.toFixed(5)}\n   Carte : https://www.google.com/maps?q=${o.lat.toFixed(5)},${o.lon.toFixed(5)}`}\n   Repéré le ${fr(o.date)}${o.notes?"\n   Remarques : "+o.notes:""}`).join("\n\n");
+return `Bonjour,\n\nJe vous signale ${l.length>1?"les véhicules suivants, qui semblent abandonnés":"le véhicule suivant, qui semble abandonné"} sur la voie publique :\n\n${t}\n\n${one&&one.photo?"La photo est jointe à ce message.":"Je peux fournir des photos sur demande."}\n\nCordialement`}
+let outRec=null;
+function prep(l,one){outRec=one||null;$("#txt").value=report(l,one);$("#out").hidden=false;$("#share").textContent=one&&one.photo?"Partager avec la photo":"Partager";$("#outmsg").textContent=one&&one.photo?"Touchez « Partager avec la photo », puis choisissez Mail : la photo sera jointe.":"";upd();$("#out").scrollIntoView({behavior:"smooth"})}
 function upd(){$("#mail").href="mailto:?subject="+encodeURIComponent("Signalement de véhicules abandonnés")+"&body="+encodeURIComponent($("#txt").value)}
 $("#txt").oninput=upd;
-$("#repall").onclick=()=>prep(recs.filter(on));$("#repr").onclick=()=>prep(found.map(x=>x.o));
+$("#repall").onclick=()=>prep(picked.size?recs.filter(o=>picked.has(o.id)):recs.filter(on));
+$("#pickall").onclick=()=>{picked=new Set(recs.filter(on).map(o=>o.id));refresh()};$("#pickno").onclick=()=>{picked=new Set();refresh()};$("#repr").onclick=()=>prep(found.map(x=>x.o));
 $("#copy").onclick=async()=>{const m=$("#outmsg");try{await navigator.clipboard.writeText($("#txt").value);m.textContent="Message copié."}catch(e){$("#txt").select();try{document.execCommand("copy");m.textContent="Message copié."}catch(x){m.textContent="Copie impossible : sélectionnez le texte à la main."}}};
-if(navigator.share){$("#share").hidden=false;$("#share").onclick=()=>navigator.share({title:"Signalement de véhicules abandonnés",text:$("#txt").value}).catch(()=>{})}
+if(navigator.share){$("#share").hidden=false;$("#share").onclick=async()=>{const base={title:"Signalement de véhicule abandonné",text:$("#txt").value},m=$("#outmsg");try{if(outRec&&outRec.photo){const b=await(await fetch(outRec.photo)).blob(),f=new File([b],"vehicule.jpg",{type:"image/jpeg"});if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share(Object.assign({files:[f]},base));return}m.textContent="Le partage de la photo n’est pas possible ici : seul le texte est partagé."}await navigator.share(base)}catch(x){}}}
 
 /* Plan des points */
 let me=null,sel=null;
@@ -213,7 +255,7 @@ const N=[10,20,50,100,200,500,1000,2000,5000,10000,20000,50000],bar=N.filter(v=>
 if(sel>=recs.length)sel=null;
 let g=`<text x="380" y="24" text-anchor="end" fill="var(--mut)" font-size="16" font-weight="700">N ↑</text><line x1="16" y1="384" x2="${16+bl}" y2="384" stroke="var(--ink)" stroke-width="3"/><text x="16" y="374" fill="var(--ink)" font-size="14">${bar>=1000?bar/1000+" km":bar+" m"}</text>`;
 recs.forEach((o,i)=>{if(o.lat==null)return;const x=X(o.lon),y=Y(o.lat);g+=`<g data-i="${i}" style="cursor:pointer">${sel===i?`<circle cx="${x}" cy="${y}" r="20" fill="none" stroke="var(--ink)" stroke-width="2" stroke-dasharray="4 3"/>`:""}${on(o)?`<circle cx="${x}" cy="${y}" r="13" fill="var(--acc)"/>`:`<circle cx="${x}" cy="${y}" r="12" fill="var(--card)" stroke="var(--ok)" stroke-width="4"/>`}<text x="${x}" y="${y+5}" text-anchor="middle" font-size="14" font-weight="700" fill="${on(o)?"var(--onpri)":"var(--ink)"}">${i+1}</text></g>`});
-if(me)g+=`<circle cx="${X(me.lon)}" cy="${Y(me.lat)}" r="9" fill="var(--pri)" stroke="var(--card)" stroke-width="3"/><text x="${X(me.lon)}" y="${Y(me.lat)+26}" text-anchor="middle" font-size="14" font-weight="700" fill="var(--pri)">Vous</text>`;
+if(me)g+=`<circle cx="${X(me.lon)}" cy="${Y(me.lat)}" r="9" fill="var(--me)" stroke="var(--card)" stroke-width="3"/><text x="${X(me.lon)}" y="${Y(me.lat)+26}" text-anchor="middle" font-size="14" font-weight="700" fill="var(--me)">Vous</text>`;
 svg.innerHTML=g;$("#mapinfo").innerHTML=sel!=null?`<p class="hint">Point ${sel+1}</p>`+card(recs[sel],""):""}
 $("#svg").onclick=e=>{const g=e.target.closest("g[data-i]");if(g){sel=+g.dataset.i;drawMap()}};
 $("#mebtn").onclick=async()=>{const m=$("#mapmsg");m.textContent="";try{const c=await pos();me={lat:c.latitude,lon:c.longitude};drawMap()}catch(e){m.textContent=e.message}};
@@ -225,6 +267,12 @@ $("#bksave").onclick=async()=>{const m=$("#bkmsg");m.classList.remove("err");if(
 try{await dl.save({filename:"vehicules-abandonnes-"+new Date().toISOString().slice(0,10)+".json",data:JSON.stringify({version:1,vehicules:recs})});m.textContent="Sauvegarde enregistrée."}catch(e){m.classList.add("err");m.textContent=e&&e.code==="declined"?"Sauvegarde annulée.":"La sauvegarde a échoué. Réessayez."}};
 $("#bkfile").onchange=async e=>{const f=e.target.files[0],m=$("#bkmsg");if(!f)return;m.classList.remove("err");try{const j=JSON.parse(await f.text()),a=(j.vehicules||j).filter(o=>o&&o.id);for(const o of a)await put(o);await refresh();m.textContent=a.length+(a.length>1?" véhicules restaurés.":" véhicule restauré.")}catch(x){m.classList.add("err");m.textContent="Ce fichier n’est pas une sauvegarde valable."}e.target.value=""};
 
+$("#csv").onclick=()=>{const m=$("#csvmsg");if(!recs.length){m.classList.add("err");m.textContent="Rien à exporter pour l’instant.";return}m.classList.remove("err");
+const q=v=>'"'+String(v==null?"":v).replace(/"/g,'""').replace(/\r?\n/g," ")+'"',H=["Date","Type","Marque et modèle","Couleur","Immatriculation","État","Situation","Quartier ou commune","Adresse ou lieu","Latitude","Longitude","Lien carte","Remarques"];
+const rows=recs.map(o=>[fr(o.date),o.type,o.marque,o.couleur,o.plaque,o.etat,LBL[st(o)],o.quartier,o.lieu,o.lat==null?"":o.lat.toFixed(5),o.lon==null?"":o.lon.toFixed(5),o.lat==null?"":"https://www.google.com/maps?q="+o.lat.toFixed(5)+","+o.lon.toFixed(5),o.notes]);
+const t="\ufeff"+[H].concat(rows).map(r=>r.map(q).join(";")).join("\r\n"),a=document.createElement("a");a.href=URL.createObjectURL(new Blob([t],{type:"text/csv;charset=utf-8"}));a.download="vehicules-abandonnes-"+new Date().toISOString().slice(0,10)+".csv";document.body.appendChild(a);a.click();a.remove();m.textContent="Fichier créé. Ouvrez-le avec Numbers, Excel ou l’application Fichiers."};
+
+startWatch();
 openDb().then(refresh);
 </script>
 </body>
