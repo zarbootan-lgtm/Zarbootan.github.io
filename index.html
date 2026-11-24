@@ -713,6 +713,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 .sel{display:flex;align-items:center;gap:10px;font-weight:700;margin:10px 0 0}
 .sel input{width:26px;height:26px;min-height:0;padding:0;accent-color:var(--pri);flex:none}
 .badge{display:inline-block;padding:2px 10px;border-radius:999px;border:2px solid var(--acc);color:var(--acc);font-weight:700;font-size:.85rem}
+.badge.sig{border-color:var(--ok);color:var(--ok)}.badge.rel{background:var(--acc);color:#fff}.card.warn{border-color:var(--acc);font-weight:700}
 .badge.ok{border-color:var(--ok);color:var(--ok)}
 svg#svg{width:100%;height:auto;background:var(--bg);border:1px solid var(--line);border-radius:14px}
 .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.chip{min-height:46px;min-width:46px;padding:0 14px;border-radius:999px;border:2px solid var(--line);background:var(--card);color:var(--ink);font:inherit;font-weight:700;cursor:pointer}.chip[aria-pressed="true"]{background:linear-gradient(135deg,var(--pri),var(--pri2));color:var(--onpri);border-color:transparent}.chip.gone{opacity:.75}
@@ -775,10 +776,24 @@ svg#svg{width:100%;height:auto;background:var(--bg);border:1px solid var(--line)
 </section>
 
 <section id="list" hidden>
-<label for="sort" style="margin-top:0">Trier par</label>
+<div id="alerte" class="card warn" hidden></div>
+<label for="q" style="margin-top:0">Rechercher</label>
+<input id="q" type="search" placeholder="Quartier, plaque, lieu, marque…" autocomplete="off">
+<div class="two"><div><label for="fsit">Situation</label><select id="fsit"><option value="">Toutes</option><option value="present">Toujours sur place</option><option value="enleve">Enlevés</option></select></div>
+<div><label for="fsuivi">Suivi mairie</label><select id="fsuivi"><option value="">Tous</option><option value="asig">À signaler</option><option value="sig">Déjà signalés</option><option value="relance">À relancer</option></select></div></div>
+<div class="two"><div><label for="fdate">Période</label><select id="fdate"><option value="">Toutes</option><option value="7">7 derniers jours</option><option value="30">30 derniers jours</option><option value="90">3 derniers mois</option></select></div>
+<div><label for="fquart">Quartier</label><select id="fquart"><option value="">Tous</option></select></div></div>
+<p class="hint" id="fres"></p>
+<label for="sort">Trier par</label>
 <select id="sort"><option value="recent">Plus récents d’abord</option><option value="ancien">Plus anciens d’abord</option><option value="quartier">Quartier (A à Z)</option><option value="lieu">Adresse ou lieu (A à Z)</option><option value="type">Type de véhicule</option></select>
 <div class="two" style="margin:12px 0"><button class="btn alt" id="pickall" type="button">Tout choisir</button><button class="btn alt" id="pickno" type="button">Ne rien choisir</button></div>
 <div id="items"></div>
+<div class="card"><b>Réglages du suivi</b>
+<label for="mairie">Adresse e-mail de la mairie</label>
+<input id="mairie" type="email" inputmode="email" placeholder="service@mairie.fr" autocomplete="off">
+<label for="delai">Me rappeler après (jours)</label>
+<input id="delai" type="number" inputmode="numeric" min="1" value="15">
+<p class="hint">Ces réglages restent sur ce téléphone. Un véhicule signalé depuis plus de ce délai et toujours sur place est marqué « À relancer ».</p></div>
 <button class="btn" id="repall" type="button">Préparer le signalement pour la mairie</button>
 <button class="btn alt" id="csv" type="button">Exporter la liste (tableur)</button>
 <p class="msg" id="csvmsg" role="status"></p>
@@ -824,10 +839,11 @@ svg#svg{width:100%;height:auto;background:var(--bg);border:1px solid var(--line)
 <button class="btn" id="copy" type="button">Copier le message</button>
 <a class="btn alt" id="mail" target="_blank" rel="noopener">Ouvrir dans ma messagerie</a>
 <button class="btn alt" id="share" type="button" hidden>Partager</button>
+<button class="btn" id="marksig" type="button">Marquer comme signalé aujourd’hui</button>
 <p class="msg" id="outmsg" role="status"></p>
 </section>
 
-<p class="hint">Version 6. Les données restent sur ce téléphone. Si vous effacez les données du navigateur, elles seront perdues.</p>
+<p class="hint">Version 7. Les données restent sur ce téléphone. Si vous effacez les données du navigateur, elles seront perdues.</p>
 </div>
 
 <script>
@@ -894,17 +910,33 @@ await put(o);const was=!!old;resetForm();m.textContent=was?"Modifications enregi
 /* Affichage */
 const PS={photo:"position de la photo",gps:"position du téléphone",saisie:"position saisie"};
 const st=o=>o.statut||"present",on=o=>st(o)==="present",LBL={present:"Toujours sur place",mairie:"Enlevé par la mairie",proprio:"Enlevé par le propriétaire"};
-const badge=o=>`<span class="badge${on(o)?"":" ok"}">${LBL[st(o)]}</span>`;
-const card=(o,extra)=>`<div class="card item">${o.photo?`<img src="${o.photo}" alt="Photo du véhicule">`:`<div class="ph">Pas de photo</div>`}<div><b>${esc(o.type)}${o.marque?", "+esc(o.marque):""}${o.couleur?", "+esc(o.couleur):""}</b>${o.plaque?"Plaque : "+esc(o.plaque):"Plaque non visible"}<br>${esc(o.etat)}<br>${badge(o)}<br>${o.quartier||o.lieu?esc([o.quartier,o.lieu].filter(Boolean).join(", "))+"<br>":""}Repéré le ${fr(o.date)}<br>${extra||""}${o.lat==null?"Position non relevée":`<a href="https://www.google.com/maps?q=${o.lat},${o.lon}" target="_blank" rel="noopener">Voir sur la carte</a>${PS[o.psrc]?` <span class="hint">(${PS[o.psrc]})</span>`:""}`}${extra===undefined?`${on(o)?`<br><label class="sel"><input type="checkbox" data-pick="${o.id}"${picked.has(o.id)?" checked":""}> Choisir pour le signalement</label>`:""}<br><button class="btn alt" data-edit="${o.id}" type="button">Modifier la fiche</button>${o.photo&&on(o)?`<br><button class="btn" data-send="${o.id}" type="button">Envoyer cette fiche avec la photo</button>`:""}<br><select data-st="${o.id}" aria-label="Situation du véhicule">${Object.keys(LBL).map(k=>`<option value="${k}"${st(o)===k?" selected":""}>${LBL[k]}</option>`).join("")}</select><br><button class="btn danger" data-del="${o.id}" type="button">Supprimer de la liste</button>`:""}</div></div>`;
+const DAY=864e5,cfg={get:(k,d)=>{try{return localStorage.getItem(k)||d}catch(e){return cmem[k]||d}},set:(k,v)=>{try{localStorage.setItem(k,v)}catch(e){cmem[k]=v}}},cmem={};
+const delai=()=>Math.max(1,parseInt(cfg.get("delai","15"))||15),days=d=>Math.floor((Date.now()-new Date(d))/DAY);
+const suivi=o=>!on(o)?"":!o.signaleDate?"asig":days(o.signaleDate)>=delai()?"relance":"sig";
+const badge=o=>{const v=suivi(o),n=o.signaleDate?days(o.signaleDate):0;return `<span class="badge${on(o)?"":" ok"}">${LBL[st(o)]}</span>`+(v==="asig"?` <span class="badge">À signaler</span>`:v==="sig"?` <span class="badge sig">Signalé il y a ${n} j</span>`:v==="relance"?` <span class="badge rel">À relancer (signalé il y a ${n} j)</span>`:"")};
+const card=(o,extra)=>`<div class="card item">${o.photo?`<img src="${o.photo}" alt="Photo du véhicule">`:`<div class="ph">Pas de photo</div>`}<div><b>${esc(o.type)}${o.marque?", "+esc(o.marque):""}${o.couleur?", "+esc(o.couleur):""}</b>${o.plaque?"Plaque : "+esc(o.plaque):"Plaque non visible"}<br>${esc(o.etat)}<br>${badge(o)}<br>${o.quartier||o.lieu?esc([o.quartier,o.lieu].filter(Boolean).join(", "))+"<br>":""}Repéré le ${fr(o.date)}<br>${extra||""}${o.lat==null?"Position non relevée":`<a href="https://www.google.com/maps?q=${o.lat},${o.lon}" target="_blank" rel="noopener">Voir sur la carte</a>${PS[o.psrc]?` <span class="hint">(${PS[o.psrc]})</span>`:""}`}${extra===undefined?`${on(o)?`<br><label class="sel"><input type="checkbox" data-pick="${o.id}"${picked.has(o.id)?" checked":""}> Choisir pour le signalement</label>`:""}<br><button class="btn alt" data-edit="${o.id}" type="button">Modifier la fiche</button>${o.photo&&on(o)?`<br><button class="btn" data-send="${o.id}" type="button">Envoyer cette fiche avec la photo</button>`:""}${on(o)?`<br><button class="btn alt" data-sig="${o.id}" type="button">${o.signaleDate?"Annuler « signalé » (signalé le "+new Date(o.signaleDate).toLocaleDateString("fr-FR")+")":"Marquer comme signalé"}</button>`:""}<br><select data-st="${o.id}" aria-label="Situation du véhicule">${Object.keys(LBL).map(k=>`<option value="${k}"${st(o)===k?" selected":""}>${LBL[k]}</option>`).join("")}</select><br><button class="btn danger" data-del="${o.id}" type="button">Supprimer de la liste</button>`:""}</div></div>`;
 const txt=(a,b)=>!a&&b?1:a&&!b?-1:String(a||"").localeCompare(String(b||""),"fr",{sensitivity:"base"});
 let picked=new Set();
-const updRep=()=>{$("#repall").textContent=picked.size?"Préparer le signalement ("+picked.size+" choisi"+(picked.size>1?"s":"")+", sans photos)":"Préparer le signalement pour tous les véhicules sur place"};
+const updRep=()=>{$("#repall").textContent=picked.size?"Préparer le signalement ("+picked.size+" choisi"+(picked.size>1?"s":"")+", sans photos)":$("#q").value||$("#fsit").value||$("#fsuivi").value||$("#fdate").value||$("#fquart").value?"Préparer le signalement pour les véhicules affichés":"Préparer le signalement pour tous les véhicules sur place"};
 const cmp=(a,b)=>{const k=$("#sort").value,r=on(b)-on(a);if(r)return r;if(k==="ancien")return a.id-b.id;if(k==="quartier")return txt(a.quartier,b.quartier)||b.id-a.id;if(k==="lieu")return txt(a.lieu,b.lieu)||b.id-a.id;if(k==="type")return txt(a.type,b.type)||b.id-a.id;return b.id-a.id};
 $("#sort").onchange=()=>refresh();
+let vis=[];const norm=v=>String(v||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
+const plq=v=>norm(v).replace(/[^a-z0-9]/g,"");
+function filt(o){const q=norm($("#q").value.trim()),qp=plq($("#q").value);if(q){const hay=norm([o.type,o.marque,o.couleur,o.quartier,o.lieu,o.notes,o.etat].join(" "));if(!hay.includes(q)&&!(qp&&plq(o.plaque).includes(qp)))return false}
+const a=$("#fsit").value;if(a==="present"&&!on(o))return false;if(a==="enleve"&&on(o))return false;
+const b=$("#fsuivi").value;if(b){const v=suivi(o);if(b==="asig"&&v!=="asig")return false;if(b==="sig"&&v!=="sig"&&v!=="relance")return false;if(b==="relance"&&v!=="relance")return false}
+const d=$("#fdate").value;if(d&&days(o.date)>+d)return false;const c=$("#fquart").value;if(c&&(o.quartier||"")!==c)return false;return true}
+["#q","#fsit","#fsuivi","#fdate","#fquart"].forEach(k=>$(k).addEventListener(k==="#q"?"input":"change",()=>refresh()));
+$("#mairie").value=cfg.get("mairie","");$("#delai").value=delai();
+$("#mairie").onchange=()=>{cfg.set("mairie",$("#mairie").value.trim());upd()};$("#delai").onchange=()=>{cfg.set("delai",String(Math.max(1,parseInt($("#delai").value)||15)));$("#delai").value=delai();refresh()};
 async function refresh(){recs=(await getAll()).slice().sort(cmp);const n=recs.length;const p=recs.filter(on).length,x=n-p;$("#count").textContent=n?p+(p>1?" véhicules":" véhicule")+" encore sur place"+(x?", "+x+(x>1?" enlevés.":" enlevé."):"."):"Aucun véhicule noté pour l’instant.";
-$("#items").innerHTML=n?recs.map(o=>card(o)).join(""):`<div class="card">Votre liste est vide. Utilisez l’onglet « Signaler » pour ajouter un véhicule.</div>`;$("#repall").hidden=!p;picked=new Set([...picked].filter(id=>recs.some(o=>o.id===id&&on(o))));updRep();
+const qs=[...new Set(recs.map(o=>o.quartier).filter(Boolean))].sort(txt),fq=$("#fquart"),cq=fq.value;fq.innerHTML=`<option value="">Tous</option>`+qs.map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join("");fq.value=qs.includes(cq)?cq:"";
+vis=recs.filter(filt);const nrel=recs.filter(o=>suivi(o)==="relance").length,nasig=recs.filter(o=>suivi(o)==="asig").length;
+const al=$("#alerte");al.hidden=!(nrel||nasig);al.innerHTML=(nrel?`${nrel} véhicule${nrel>1?"s":""} signalé${nrel>1?"s":""} depuis plus de ${delai()} jours ${nrel>1?"sont":"est"} toujours sur place : pensez à relancer la mairie.`:"")+(nrel&&nasig?"<br>":"")+(nasig?`${nasig} véhicule${nasig>1?"s":""} pas encore signalé${nasig>1?"s":""} à la mairie.`:"");
+$("#fres").textContent=n&&vis.length!==n?vis.length+" fiche"+(vis.length>1?"s":"")+" affichée"+(vis.length>1?"s":"")+" sur "+n+".":"";
+$("#items").innerHTML=!n?`<div class="card">Votre liste est vide. Utilisez l’onglet « Signaler » pour ajouter un véhicule.</div>`:vis.length?vis.map(o=>card(o)).join(""):`<div class="card">Aucune fiche ne correspond à votre recherche.</div>`;$("#repall").hidden=!vis.some(on);picked=new Set([...picked].filter(id=>recs.some(o=>o.id===id&&on(o))));updRep();
 $("#centre").innerHTML=`<option value="me">Ma position actuelle</option>`+recs.filter(o=>o.lat!=null).map(o=>`<option value="${o.id}">${esc(o.type)} ${esc(o.lieu||fr(o.date))}</option>`).join("")}
-$("#items").onclick=async e=>{if(e.target.dataset.edit){startEdit(+e.target.dataset.edit);return}if(e.target.dataset.send){const o=recs.find(v=>v.id===+e.target.dataset.send);if(o)prep([o],o);return}const id=e.target.dataset.del;if(!id)return;if(e.target.dataset.ok){del(+id);await refresh()}else{e.target.dataset.ok=1;e.target.textContent="Confirmer la suppression"}};
+$("#items").onclick=async e=>{if(e.target.dataset.edit){startEdit(+e.target.dataset.edit);return}if(e.target.dataset.sig){const o=recs.find(v=>v.id===+e.target.dataset.sig);if(o){o.signaleDate=o.signaleDate?null:new Date().toISOString();await put(o);await refresh()}return}if(e.target.dataset.send){const o=recs.find(v=>v.id===+e.target.dataset.send);if(o)prep([o],o);return}const id=e.target.dataset.del;if(!id)return;if(e.target.dataset.ok){del(+id);await refresh()}else{e.target.dataset.ok=1;e.target.textContent="Confirmer la suppression"}};
 
 $("#items").onchange=async e=>{if(e.target.dataset.pick){const k=+e.target.dataset.pick;if(e.target.checked)picked.add(k);else picked.delete(k);updRep();return}const id=e.target.dataset.st;if(!id)return;const o=recs.find(v=>v.id===+id);if(!o)return;o.statut=e.target.value;o.finDate=on(o)?null:new Date().toISOString();await put(o);await refresh()};
 
@@ -917,14 +949,15 @@ $("#res").hidden=false;$("#n").textContent=found.length;$("#nl").textContent=(fo
 $("#ritems").innerHTML=found.map(x=>card(x.o,"À "+Math.round(x.d)+" m<br>")).join("");$("#repr").hidden=!found.length};
 
 /* Message pour la mairie */
-function report(l,one){const t=l.map((o,i)=>`${i+1}. ${o.type}${o.marque?" "+o.marque:""}${o.couleur?", "+o.couleur:""}\n   Immatriculation : ${o.plaque||"non visible"}\n   État : ${o.etat}\n   Lieu : ${[o.quartier,o.lieu].filter(Boolean).join(", ")||"non précisé"}${o.lat==null?"":`\n   Position GPS : ${o.lat.toFixed(5)}, ${o.lon.toFixed(5)}\n   Carte : https://www.google.com/maps?q=${o.lat.toFixed(5)},${o.lon.toFixed(5)}`}\n   Repéré le ${fr(o.date)}${o.notes?"\n   Remarques : "+o.notes:""}`).join("\n\n");
+function report(l,one){const t=l.map((o,i)=>`${i+1}. ${o.type}${o.marque?" "+o.marque:""}${o.couleur?", "+o.couleur:""}\n   Immatriculation : ${o.plaque||"non visible"}\n   État : ${o.etat}\n   Lieu : ${[o.quartier,o.lieu].filter(Boolean).join(", ")||"non précisé"}${o.lat==null?"":`\n   Position GPS : ${o.lat.toFixed(5)}, ${o.lon.toFixed(5)}\n   Carte : https://www.google.com/maps?q=${o.lat.toFixed(5)},${o.lon.toFixed(5)}`}\n   Repéré le ${fr(o.date)}${o.signaleDate?"\n   Déjà signalé le "+new Date(o.signaleDate).toLocaleDateString("fr-FR")+" : le véhicule est toujours sur place.":""}${o.notes?"\n   Remarques : "+o.notes:""}`).join("\n\n");
 return `Bonjour,\n\nJe vous signale ${l.length>1?"les véhicules suivants, qui semblent abandonnés":"le véhicule suivant, qui semble abandonné"} sur la voie publique :\n\n${t}\n\n${one&&one.photo?"La photo est jointe à ce message.":"Je peux fournir des photos sur demande."}\n\nCordialement`}
-let outRec=null;
-function prep(l,one){outRec=one||null;$("#txt").value=report(l,one);$("#out").hidden=false;$("#share").textContent=one&&one.photo?"Partager avec la photo":"Partager";$("#outmsg").textContent=one&&one.photo?"Touchez « Partager avec la photo », puis choisissez Mail : la photo sera jointe.":"";upd();$("#out").scrollIntoView({behavior:"smooth"})}
-function upd(){$("#mail").href="mailto:?subject="+encodeURIComponent("Signalement de véhicules abandonnés")+"&body="+encodeURIComponent($("#txt").value)}
+let outRec=null,outList=[];
+function prep(l,one){outRec=one||null;outList=l;$("#marksig").hidden=!l.length;$("#marksig").textContent=l.length>1?"Marquer ces "+l.length+" véhicules comme signalés aujourd’hui":"Marquer comme signalé aujourd’hui";$("#txt").value=report(l,one);$("#out").hidden=false;$("#share").textContent=one&&one.photo?"Partager avec la photo":"Partager";$("#outmsg").textContent=one&&one.photo?"Touchez « Partager avec la photo », puis choisissez Mail : la photo sera jointe.":"";upd();$("#out").scrollIntoView({behavior:"smooth"})}
+function upd(){$("#mail").href="mailto:"+encodeURIComponent(cfg.get("mairie","")).replace(/%40/g,"@")+"?subject="+encodeURIComponent(outList.length&&outList.every(o=>o.signaleDate)?"Relance : signalement de véhicules abandonnés":"Signalement de véhicules abandonnés")+"&body="+encodeURIComponent($("#txt").value)}
 $("#txt").oninput=upd;
-$("#repall").onclick=()=>prep(picked.size?recs.filter(o=>picked.has(o.id)):recs.filter(on));
-$("#pickall").onclick=()=>{picked=new Set(recs.filter(on).map(o=>o.id));refresh()};$("#pickno").onclick=()=>{picked=new Set();refresh()};$("#repr").onclick=()=>prep(found.map(x=>x.o));
+$("#marksig").onclick=async()=>{const now=new Date().toISOString();for(const o of outList){const r=recs.find(v=>v.id===o.id)||o;r.signaleDate=now;await put(r)}$("#outmsg").textContent=outList.length+" fiche"+(outList.length>1?"s":"")+" marquée"+(outList.length>1?"s":"")+" comme signalée"+(outList.length>1?"s":"")+" aujourd’hui.";$("#marksig").hidden=true;await refresh()};
+$("#repall").onclick=()=>prep(picked.size?recs.filter(o=>picked.has(o.id)):vis.filter(on));
+$("#pickall").onclick=()=>{picked=new Set(vis.filter(on).map(o=>o.id));refresh()};$("#pickno").onclick=()=>{picked=new Set();refresh()};$("#repr").onclick=()=>prep(found.map(x=>x.o));
 $("#copy").onclick=async()=>{const m=$("#outmsg");try{await navigator.clipboard.writeText($("#txt").value);m.textContent="Message copié."}catch(e){$("#txt").select();try{document.execCommand("copy");m.textContent="Message copié."}catch(x){m.textContent="Copie impossible : sélectionnez le texte à la main."}}};
 if(navigator.share){$("#share").hidden=false;$("#share").onclick=async()=>{const base={title:"Signalement de véhicule abandonné",text:$("#txt").value},m=$("#outmsg");try{if(outRec&&outRec.photo){const b=await(await fetch(outRec.photo)).blob(),f=new File([b],"vehicule.jpg",{type:"image/jpeg"});if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share(Object.assign({files:[f]},base));return}m.textContent="Le partage de la photo n’est pas possible ici : seul le texte est partagé."}await navigator.share(base)}catch(x){}}}
 
@@ -977,8 +1010,8 @@ try{await dl.save({filename:"vehicules-abandonnes-"+new Date().toISOString().sli
 $("#bkfile").onchange=async e=>{const f=e.target.files[0],m=$("#bkmsg");if(!f)return;m.classList.remove("err");try{const j=JSON.parse(await f.text()),a=(j.vehicules||j).filter(o=>o&&o.id);for(const o of a)await put(o);await refresh();m.textContent=a.length+(a.length>1?" véhicules restaurés.":" véhicule restauré.")}catch(x){m.classList.add("err");m.textContent="Ce fichier n’est pas une sauvegarde valable."}e.target.value=""};
 
 $("#csv").onclick=()=>{const m=$("#csvmsg");if(!recs.length){m.classList.add("err");m.textContent="Rien à exporter pour l’instant.";return}m.classList.remove("err");
-const q=v=>'"'+String(v==null?"":v).replace(/"/g,'""').replace(/\r?\n/g," ")+'"',H=["Date","Type","Marque et modèle","Couleur","Immatriculation","État","Situation","Quartier ou commune","Adresse ou lieu","Latitude","Longitude","Lien carte","Remarques"];
-const rows=recs.map(o=>[fr(o.date),o.type,o.marque,o.couleur,o.plaque,o.etat,LBL[st(o)],o.quartier,o.lieu,o.lat==null?"":o.lat.toFixed(5),o.lon==null?"":o.lon.toFixed(5),o.lat==null?"":"https://www.google.com/maps?q="+o.lat.toFixed(5)+","+o.lon.toFixed(5),o.notes]);
+const q=v=>'"'+String(v==null?"":v).replace(/"/g,'""').replace(/\r?\n/g," ")+'"',H=["Date","Type","Marque et modèle","Couleur","Immatriculation","État","Situation","Quartier ou commune","Adresse ou lieu","Latitude","Longitude","Lien carte","Remarques","Signalé à la mairie le"];
+const rows=recs.map(o=>[fr(o.date),o.type,o.marque,o.couleur,o.plaque,o.etat,LBL[st(o)],o.quartier,o.lieu,o.lat==null?"":o.lat.toFixed(5),o.lon==null?"":o.lon.toFixed(5),o.lat==null?"":"https://www.google.com/maps?q="+o.lat.toFixed(5)+","+o.lon.toFixed(5),o.notes,o.signaleDate?new Date(o.signaleDate).toLocaleDateString("fr-FR"):""]);
 const t="\ufeff"+[H].concat(rows).map(r=>r.map(q).join(";")).join("\r\n"),a=document.createElement("a");a.href=URL.createObjectURL(new Blob([t],{type:"text/csv;charset=utf-8"}));a.download="vehicules-abandonnes-"+new Date().toISOString().slice(0,10)+".csv";document.body.appendChild(a);a.click();a.remove();m.textContent="Fichier créé. Ouvrez-le avec Numbers, Excel ou l’application Fichiers."};
 
 startWatch();
