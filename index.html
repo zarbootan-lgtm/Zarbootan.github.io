@@ -715,6 +715,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 .badge{display:inline-block;padding:2px 10px;border-radius:999px;border:2px solid var(--acc);color:var(--acc);font-weight:700;font-size:.85rem}
 .badge.ok{border-color:var(--ok);color:var(--ok)}
 svg#svg{width:100%;height:auto;background:var(--bg);border:1px solid var(--line);border-radius:14px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.chip{min-height:46px;min-width:46px;padding:0 14px;border-radius:999px;border:2px solid var(--line);background:var(--card);color:var(--ink);font:inherit;font-weight:700;cursor:pointer}.chip[aria-pressed="true"]{background:linear-gradient(135deg,var(--pri),var(--pri2));color:var(--onpri);border-color:transparent}.chip.gone{opacity:.75}
 #lmap{height:400px;border-radius:14px;overflow:hidden;border:1px solid var(--line);z-index:0}
 .leaflet-container{font:inherit}
 .pin{width:34px;height:34px;border-radius:50%;background:var(--acc);color:var(--onpri);font:700 15px/28px "Atkinson Hyperlegible",system-ui,sans-serif;text-align:center;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.45)}
@@ -744,9 +745,9 @@ svg#svg{width:100%;height:auto;background:var(--bg);border:1px solid var(--line)
 <p class="hint">Photothèque : touchez « Options » et activez « Position » pour lire la position dans la photo.</p>
 <img id="prev" alt="Aperçu de la photo" hidden>
 <label>2. Lieu (GPS)</label>
-<button class="btn alt" id="gpsbtn" type="button" style="margin-top:0">Relever ma position</button>
+<div class="two"><button class="btn alt" id="exifbtn" type="button">Position de la photo</button><button class="btn alt" id="gpsbtn" type="button">Ma position actuelle</button></div>
 <p class="hint" id="live">GPS : démarrage…</p>
-<p class="hint" id="gpsmsg">La position est relevée automatiquement après la photo. Autorisez la localisation si l’iPhone le demande.</p>
+<p class="hint" id="gpsmsg">Photothèque : la position est lue dans la photo. Appareil photo : c’est le GPS du téléphone.</p>
 <label for="manu">Coordonnées (remplies automatiquement, ou à coller)</label>
 <input id="manu" placeholder="-21.11500, 55.53600">
 <p class="hint">Sur iPhone : dans Plans, touchez longuement le lieu, puis copiez les coordonnées (avec des points).</p>
@@ -790,14 +791,13 @@ svg#svg{width:100%;height:auto;background:var(--bg);border:1px solid var(--line)
 </section>
 
 <section id="map" hidden>
-<div class="card">
-<div id="lmap" hidden></div>
+<div class="card"><div id="lmap" hidden></div>
 <svg id="svg" viewBox="0 0 400 400" role="img" aria-label="Plan des véhicules notés"></svg>
-<p class="hint" id="maphint">Plan simplifié, sans fond de carte. Point plein : encore sur place. Cercle vide : enlevé. Touchez un point pour voir sa fiche.</p>
-<button class="btn alt" id="mebtn" type="button">Afficher ma position sur le plan</button>
-<p class="msg err" id="mapmsg" role="status"></p>
-</div>
-<div id="mapinfo"></div>
+<div id="mapnums" class="chips" role="group" aria-label="Choisir un véhicule"></div></div>
+<div id="mapinfo" aria-live="polite"></div>
+<div class="card"><p class="hint" id="maphint" style="margin-top:0"></p>
+<button class="btn alt" id="mebtn" type="button">Afficher ma position sur la carte</button>
+<p class="msg err" id="mapmsg" role="status"></p></div>
 </section>
 
 <section id="rad" hidden>
@@ -827,7 +827,7 @@ svg#svg{width:100%;height:auto;background:var(--bg);border:1px solid var(--line)
 <p class="msg" id="outmsg" role="status"></p>
 </section>
 
-<p class="hint">Version 5. Les données restent sur ce téléphone. Si vous effacez les données du navigateur, elles seront perdues.</p>
+<p class="hint">Version 6. Les données restent sur ce téléphone. Si vous effacez les données du navigateur, elles seront perdues.</p>
 </div>
 
 <script>
@@ -857,10 +857,12 @@ document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>show(b.dataset.
 
 /* Position GPS */
 function pos(){return new Promise((ok,ko)=>{if(!navigator.geolocation)return ko(new Error("Le GPS n’est pas disponible sur cet appareil."));navigator.geolocation.getCurrentPosition(p=>ok(p.coords),e=>ko(new Error(e.code===1?"Autorisez la localisation pour ce site (Réglages de l’iPhone, votre navigateur, Position), puis réessayez. Vous pouvez aussi saisir les coordonnées ci-dessous.":"Position introuvable. Essayez en extérieur.")),{enableHighAccuracy:true,timeout:15000,maximumAge:0})})}
-function setPos(la,lo,src,acc){cur.lat=la;cur.lon=lo;cur.acc=acc||null;if(src!=="saisie")$("#manu").value=la.toFixed(5)+", "+lo.toFixed(5);const m=$("#gpsmsg");m.classList.remove("err");m.textContent="Position "+src+" : "+la.toFixed(5)+", "+lo.toFixed(5)+(acc?" (précision "+acc+" m)":"")}
-async function gps(){const m=$("#gpsmsg");m.classList.remove("err");if(wid!=null&&last&&Date.now()-last.t<600000){setPos(last.lat,last.lon,"relevée",last.acc);return}m.textContent="Recherche de la position…";try{const c=await pos();setPos(c.latitude,c.longitude,"relevée",Math.round(c.accuracy))}catch(e){m.classList.add("err");m.textContent=e.message}}
-function noPos(){const m=$("#gpsmsg");m.classList.add("err");m.textContent="Aucune position dans cette photo. Dans la Photothèque, touchez « Options » et activez « Position », ou saisissez les coordonnées ci-dessous."}
+function setPos(la,lo,src,acc){cur.lat=la;cur.lon=lo;cur.acc=acc||null;cur.psrc=src==="lue dans la photo"?"photo":src==="saisie"?"saisie":"gps";if(src!=="saisie")$("#manu").value=la.toFixed(5)+", "+lo.toFixed(5);const m=$("#gpsmsg");m.classList.remove("err");m.textContent="Position "+src+" : "+la.toFixed(5)+", "+lo.toFixed(5)+(acc?" (précision "+acc+" m)":"")}
+async function gps(){const m=$("#gpsmsg");m.classList.remove("err");if(wid!=null&&last&&Date.now()-last.t<600000){setPos(last.lat,last.lon,"du téléphone (GPS)",last.acc);return}m.textContent="Recherche de la position…";try{const c=await pos();setPos(c.latitude,c.longitude,"du téléphone (GPS)",Math.round(c.accuracy))}catch(e){m.classList.add("err");m.textContent=e.message}}
+function noPos(){const m=$("#gpsmsg");m.classList.add("err");m.textContent="Cette photo ne contient pas de position. Votre position actuelle n’a pas été utilisée. Dans la Photothèque, touchez « Options » et activez « Position », ou touchez « Ma position actuelle », ou saisissez les coordonnées."}
 $("#gpsbtn").onclick=gps;
+let lastFile=null;
+$("#exifbtn").onclick=async()=>{const f=lastFile||$("#photo").files[0]||$("#photocam").files[0],m=$("#gpsmsg");m.classList.remove("err");if(!f){m.classList.add("err");m.textContent="Choisissez d’abord une photo.";return}m.textContent="Lecture de la position de la photo…";const p=await readExif(f);p?setPos(p.lat,p.lon,"lue dans la photo"):noPos()};
 /* GPS en avance : la position est suivie pendant que l’onglet Signaler est ouvert */
 let last=null,wid=null;
 function liveMsg(t,bad){const l=$("#live");l.textContent=t;l.classList.toggle("err",!!bad)}
@@ -873,7 +875,7 @@ $("#manu").oninput=()=>{const p=parseLL($("#manu").value);if(p)setPos(p[0],p[1],
 
 /* Photo réduite pour économiser la mémoire */
 const onPhoto=e=>{const f=e.target.files[0];if(!f)return;const m=$("#gpsmsg"),sm=$("#savemsg");m.classList.remove("err");sm.textContent="";m.textContent=editId?"Nouvelle photo reçue. La position de la fiche est conservée.":"Photo reçue ("+Math.round(f.size/1024)+" Ko), analyse en cours…";
-if(!editId)readExif(f).then(p=>p?setPos(p.lat,p.lon,"lue dans la photo"):(e.target.id==="photocam"?gps():noPos()));
+lastFile=f;if(!editId){cur.lat=null;cur.lon=null;cur.acc=null;cur.psrc=null;$("#manu").value="";readExif(f).then(p=>p?setPos(p.lat,p.lon,"lue dans la photo"):(e.target.id==="photocam"?gps():noPos()))}
 const u=URL.createObjectURL(f),img=new Image(),bad=()=>{cur.photo=null;sm.classList.add("err");sm.textContent="La photo n’a pas pu être réduite : elle ne sera pas enregistrée."};$("#prev").src=u;$("#prev").hidden=false;
 img.onload=()=>{try{const s=Math.min(1,900/Math.max(img.width,img.height)),c=document.createElement("canvas");c.width=Math.round(img.width*s);c.height=Math.round(img.height*s);c.getContext("2d").drawImage(img,0,0,c.width,c.height);cur.photo=c.toDataURL("image/jpeg",.7);$("#prev").src=cur.photo}catch(x){bad()}};
 img.onerror=bad;img.src=u};
@@ -882,17 +884,18 @@ $("#photo").onchange=onPhoto;$("#photocam").onchange=onPhoto;
 /* Enregistrer */
 let editId=null;
 const FIELDS=["marque","couleur","plaque","quartier","lieu","notes"];
-function resetForm(){cur={photo:null,lat:null,lon:null,acc:null};editId=null;["photo","photocam","manu"].concat(FIELDS).forEach(k=>$("#"+k).value="");$("#type").selectedIndex=0;$("#etat").selectedIndex=0;$("#prev").hidden=true;$("#editban").hidden=true;$("#cancel").hidden=true;$("#save").textContent="Enregistrer ce véhicule";$("#gpsmsg").classList.remove("err");$("#gpsmsg").textContent="La position est relevée automatiquement après la photo. Autorisez la localisation si l’iPhone le demande."}
-function startEdit(id){const o=recs.find(v=>v.id===id);if(!o)return;resetForm();editId=id;cur={photo:o.photo||null,lat:o.lat,lon:o.lon,acc:o.acc};$("#type").value=o.type;$("#etat").value=o.etat;FIELDS.forEach(k=>$("#"+k).value=o[k]||"");$("#manu").value=o.lat==null?"":o.lat.toFixed(5)+", "+o.lon.toFixed(5);if(o.photo){$("#prev").src=o.photo;$("#prev").hidden=false}$("#gpsmsg").textContent=o.lat==null?"Aucune position enregistrée. Relevez-la ou saisissez des coordonnées.":"Position enregistrée. Vous pouvez la modifier ci-dessous.";$("#editban").hidden=false;$("#cancel").hidden=false;$("#save").textContent="Enregistrer les modifications";$("#savemsg").textContent="";show("new");window.scrollTo({top:0,behavior:"smooth"})}
+function resetForm(){cur={photo:null,lat:null,lon:null,acc:null};editId=null;lastFile=null;["photo","photocam","manu"].concat(FIELDS).forEach(k=>$("#"+k).value="");$("#type").selectedIndex=0;$("#etat").selectedIndex=0;$("#prev").hidden=true;$("#editban").hidden=true;$("#cancel").hidden=true;$("#save").textContent="Enregistrer ce véhicule";$("#gpsmsg").classList.remove("err");$("#gpsmsg").textContent="Photothèque : la position est lue dans la photo. Appareil photo : c’est le GPS du téléphone."}
+function startEdit(id){const o=recs.find(v=>v.id===id);if(!o)return;resetForm();editId=id;cur={photo:o.photo||null,lat:o.lat,lon:o.lon,acc:o.acc,psrc:o.psrc};$("#type").value=o.type;$("#etat").value=o.etat;FIELDS.forEach(k=>$("#"+k).value=o[k]||"");$("#manu").value=o.lat==null?"":o.lat.toFixed(5)+", "+o.lon.toFixed(5);if(o.photo){$("#prev").src=o.photo;$("#prev").hidden=false}$("#gpsmsg").textContent=o.lat==null?"Aucune position enregistrée. Relevez-la ou saisissez des coordonnées.":"Position enregistrée. Vous pouvez la modifier ci-dessous.";$("#editban").hidden=false;$("#cancel").hidden=false;$("#save").textContent="Enregistrer les modifications";$("#savemsg").textContent="";show("new");window.scrollTo({top:0,behavior:"smooth"})}
 $("#cancel").onclick=()=>{resetForm();$("#savemsg").textContent="";show("list")};
 $("#save").onclick=async()=>{const m=$("#savemsg");m.classList.remove("err");if(cur.lat==null&&!$("#lieu").value.trim()&&!$("#quartier").value.trim()){m.classList.add("err");m.textContent="Indiquez au moins une position ou une adresse.";return}
-const old=editId?recs.find(v=>v.id===editId):null,o=Object.assign({},old||{},{id:old?old.id:Date.now(),date:old?old.date:new Date().toISOString(),photo:cur.photo,lat:cur.lat,lon:cur.lon,acc:cur.acc,type:$("#type").value,etat:$("#etat").value});FIELDS.forEach(k=>o[k]=$("#"+k).value.trim());o.plaque=o.plaque.toUpperCase();
+const old=editId?recs.find(v=>v.id===editId):null,o=Object.assign({},old||{},{id:old?old.id:Date.now(),date:old?old.date:new Date().toISOString(),photo:cur.photo,lat:cur.lat,lon:cur.lon,acc:cur.acc,psrc:cur.psrc||null,type:$("#type").value,etat:$("#etat").value});FIELDS.forEach(k=>o[k]=$("#"+k).value.trim());o.plaque=o.plaque.toUpperCase();
 await put(o);const was=!!old;resetForm();m.textContent=was?"Modifications enregistrées.":"Véhicule enregistré.";await refresh();if(was)show("list")};
 
 /* Affichage */
+const PS={photo:"position de la photo",gps:"position du téléphone",saisie:"position saisie"};
 const st=o=>o.statut||"present",on=o=>st(o)==="present",LBL={present:"Toujours sur place",mairie:"Enlevé par la mairie",proprio:"Enlevé par le propriétaire"};
 const badge=o=>`<span class="badge${on(o)?"":" ok"}">${LBL[st(o)]}</span>`;
-const card=(o,extra)=>`<div class="card item">${o.photo?`<img src="${o.photo}" alt="Photo du véhicule">`:`<div class="ph">Pas de photo</div>`}<div><b>${esc(o.type)}${o.marque?", "+esc(o.marque):""}${o.couleur?", "+esc(o.couleur):""}</b>${o.plaque?"Plaque : "+esc(o.plaque):"Plaque non visible"}<br>${esc(o.etat)}<br>${badge(o)}<br>${o.quartier||o.lieu?esc([o.quartier,o.lieu].filter(Boolean).join(", "))+"<br>":""}Repéré le ${fr(o.date)}<br>${extra||""}${o.lat==null?"Position non relevée":`<a href="https://www.google.com/maps?q=${o.lat},${o.lon}" target="_blank" rel="noopener">Voir sur la carte</a>`}${extra===undefined?`${on(o)?`<br><label class="sel"><input type="checkbox" data-pick="${o.id}"${picked.has(o.id)?" checked":""}> Choisir pour le signalement</label>`:""}<br><button class="btn alt" data-edit="${o.id}" type="button">Modifier la fiche</button>${o.photo&&on(o)?`<br><button class="btn" data-send="${o.id}" type="button">Envoyer cette fiche avec la photo</button>`:""}<br><select data-st="${o.id}" aria-label="Situation du véhicule">${Object.keys(LBL).map(k=>`<option value="${k}"${st(o)===k?" selected":""}>${LBL[k]}</option>`).join("")}</select><br><button class="btn danger" data-del="${o.id}" type="button">Supprimer de la liste</button>`:""}</div></div>`;
+const card=(o,extra)=>`<div class="card item">${o.photo?`<img src="${o.photo}" alt="Photo du véhicule">`:`<div class="ph">Pas de photo</div>`}<div><b>${esc(o.type)}${o.marque?", "+esc(o.marque):""}${o.couleur?", "+esc(o.couleur):""}</b>${o.plaque?"Plaque : "+esc(o.plaque):"Plaque non visible"}<br>${esc(o.etat)}<br>${badge(o)}<br>${o.quartier||o.lieu?esc([o.quartier,o.lieu].filter(Boolean).join(", "))+"<br>":""}Repéré le ${fr(o.date)}<br>${extra||""}${o.lat==null?"Position non relevée":`<a href="https://www.google.com/maps?q=${o.lat},${o.lon}" target="_blank" rel="noopener">Voir sur la carte</a>${PS[o.psrc]?` <span class="hint">(${PS[o.psrc]})</span>`:""}`}${extra===undefined?`${on(o)?`<br><label class="sel"><input type="checkbox" data-pick="${o.id}"${picked.has(o.id)?" checked":""}> Choisir pour le signalement</label>`:""}<br><button class="btn alt" data-edit="${o.id}" type="button">Modifier la fiche</button>${o.photo&&on(o)?`<br><button class="btn" data-send="${o.id}" type="button">Envoyer cette fiche avec la photo</button>`:""}<br><select data-st="${o.id}" aria-label="Situation du véhicule">${Object.keys(LBL).map(k=>`<option value="${k}"${st(o)===k?" selected":""}>${LBL[k]}</option>`).join("")}</select><br><button class="btn danger" data-del="${o.id}" type="button">Supprimer de la liste</button>`:""}</div></div>`;
 const txt=(a,b)=>!a&&b?1:a&&!b?-1:String(a||"").localeCompare(String(b||""),"fr",{sensitivity:"base"});
 let picked=new Set();
 const updRep=()=>{$("#repall").textContent=picked.size?"Préparer le signalement ("+picked.size+" choisi"+(picked.size>1?"s":"")+", sans photos)":"Préparer le signalement pour tous les véhicules sur place"};
@@ -939,17 +942,28 @@ svg.innerHTML=g;$("#mapinfo").innerHTML=sel!=null?`<p class="hint">Point ${sel+1
 let lm=null,lay=null,tl=null,tileErr=0,tileBad=false;
 const OSM={u:"https://tile.openstreetmap.org/{z}/{x}/{y}.png",a:"© OpenStreetMap"},CARTO={u:"https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",a:"© OpenStreetMap © CARTO"};
 function addTiles(src){if(tl)lm.removeLayer(tl);tl=L.tileLayer(src.u,{maxZoom:19,subdomains:"abcd",attribution:src.a}).addTo(lm);tl.on("tileerror",()=>{tileErr++;if(tileErr===4){if(src===OSM){tileErr=0;addTiles(CARTO)}else{tileBad=true;drawMap(false)}}});tl.on("tileload",()=>{tileBad=false})}
+let mk=[];
+function chips(){$("#mapnums").innerHTML=recs.map((o,i)=>o.lat==null?"":`<button type="button" class="chip${on(o)?"":" gone"}" data-n="${i}" aria-pressed="${sel===i}">${i+1}${o.quartier?" · "+esc(o.quartier):o.lieu?" · "+esc(o.lieu):""}</button>`).join("")}
+function showSel(){const o=sel!=null?recs[sel]:null;$("#mapinfo").innerHTML=o?`<p class="hint">Point ${sel+1}</p>`+card(o,""):"";
+document.querySelectorAll("#mapnums .chip").forEach(c=>c.setAttribute("aria-pressed",String(+c.dataset.n===sel)));
+mk.forEach((m,i)=>{const e=m&&m.getElement&&m.getElement(),q=e&&e.firstChild;if(q&&q.classList)q.classList.toggle("sel",i===sel)})}
+function seeInfo(){const e=$("#mapinfo");if(e&&e.scrollIntoView)e.scrollIntoView({behavior:"smooth",block:"nearest"})}
+function pick(i){sel=i;const o=recs[i];if($("#lmap").hidden){drawSvg()}showSel();if(lm&&o&&o.lat!=null){lm.panTo([o.lat,o.lon]);if(mk[i]&&mk[i].openPopup)mk[i].openPopup()}seeInfo()}
+$("#mapnums").onclick=e=>{const b=e.target.closest(".chip");if(b)pick(+b.dataset.n)};
 function drawMap(fit){
- if(!window.L){$("#lmap").hidden=true;$("#svg").hidden=false;drawSvg();return}
+ chips();
+ if(!window.L){$("#lmap").hidden=true;$("#svg").hidden=false;drawSvg();$("#maphint").textContent="Plan simplifié, sans fond de carte. Touchez un numéro pour voir sa fiche.";showSel();return}
  $("#svg").hidden=true;$("#lmap").hidden=false;
  if(!lm){lm=L.map("lmap").setView([-21.1,55.5],10);addTiles(OSM);lay=L.layerGroup().addTo(lm)}
- lay.clearLayers();const pts=[],kk=o=>o.lat.toFixed(4)+","+o.lon.toFixed(4),G={};recs.forEach((o,i)=>{if(o.lat!=null)(G[kk(o)]=G[kk(o)]||[]).push(i)});
- recs.forEach((o,i)=>{if(o.lat==null)return;pts.push([o.lat,o.lon]);L.marker([o.lat,o.lon],{icon:L.divIcon({className:"",html:`<div class="pin${on(o)?"":" gone"}${sel===i?" sel":""}">${i+1}</div>`,iconSize:[34,34],iconAnchor:[17-(G[kk(o)].indexOf(i)-(G[kk(o)].length-1)/2)*38,17]}),keyboard:false}).addTo(lay).on("click",()=>{sel=i;drawMap(false)})});
+ lay.clearLayers();mk=[];const pts=[],kk=o=>o.lat.toFixed(4)+","+o.lon.toFixed(4),G={};recs.forEach((o,i)=>{if(o.lat!=null)(G[kk(o)]=G[kk(o)]||[]).push(i)});
+ recs.forEach((o,i)=>{if(o.lat==null)return;pts.push([o.lat,o.lon]);
+  const m=L.marker([o.lat,o.lon],{icon:L.divIcon({className:"",html:`<div class="pin${on(o)?"":" gone"}${sel===i?" sel":""}">${i+1}</div>`,iconSize:[34,34],iconAnchor:[17-(G[kk(o)].indexOf(i)-(G[kk(o)].length-1)/2)*38,17]}),keyboard:false}).addTo(lay);
+  m.bindPopup(`<b>${i+1}. ${esc(o.type)}</b>${o.quartier||o.lieu?"<br>"+esc([o.quartier,o.lieu].filter(Boolean).join(", ")):""}`,{closeButton:false,offset:[0,-14]});
+  m.on("click",()=>{sel=i;showSel();seeInfo()});mk[i]=m});
  if(me){pts.push([me.lat,me.lon]);L.circleMarker([me.lat,me.lon],{radius:9,color:"#fff",weight:3,fillColor:"#2563eb",fillOpacity:1}).addTo(lay)}
- $("#maphint").textContent=tileBad?"Les images de la carte ne se chargent pas (connexion ou protection du navigateur). Désactivez les boucliers de Brave pour ce site, ou essayez avec Safari. Les repères restent exacts.":"Fond de carte OpenStreetMap. Point plein : encore sur place. Cercle vide : enlevé. Touchez un point pour voir sa fiche."+(me?" Le point bleu est votre position.":"");
- if(sel>=recs.length)sel=null;
- $("#mapinfo").innerHTML=sel!=null&&recs[sel]?`<p class="hint">Point ${sel+1}</p>`+card(recs[sel],""):"";
- lm.invalidateSize();
+ $("#maphint").textContent=(tileBad?"Les images de la carte ne se chargent pas (connexion ou protection du navigateur). Désactivez les boucliers de Brave pour ce site, ou essayez avec Safari. Les repères restent exacts.":"Fond de carte OpenStreetMap.")+" Point plein : encore sur place. Cercle vide : enlevé. Touchez un numéro, sur la carte ou dans la liste, pour voir sa fiche."+(me?" Le point bleu est votre position.":"");
+ if(sel!=null&&sel>=recs.length)sel=null;
+ showSel();lm.invalidateSize();
  if(fit){if(pts.length===1)lm.setView(pts[0],17);else if(pts.length>1)lm.fitBounds(pts,{padding:[40,40],maxZoom:18})}
 }
 $("#svg").onclick=e=>{const g=e.target.closest("g[data-i]");if(g){sel=+g.dataset.i;drawMap()}};
