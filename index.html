@@ -4,6 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#211b17">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Épaves">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <style>
 /* required styles */
 
@@ -730,6 +736,7 @@ svg#svg{width:100%;height:auto;background:var(--bg);border:1px solid var(--line)
 <div class="wrap">
 <header class="hero"><p class="kick">Répertoire des signalements</p><h1>Véhicules abandonnés</h1>
 <p class="sub" id="count">Aucun véhicule noté pour l’instant.</p></header>
+<p id="offline" class="card warn" role="status" hidden>Vous êtes hors connexion. Tout fonctionne, sauf le fond de la carte (seules les zones déjà consultées s’affichent).</p>
 <nav role="tablist">
 <button data-t="new" aria-selected="true">Signaler</button>
 <button data-t="list" aria-selected="false">Ma liste</button>
@@ -847,7 +854,10 @@ svg#svg{width:100%;height:auto;background:var(--bg);border:1px solid var(--line)
 <p class="msg" id="outmsg" role="status"></p>
 </section>
 
-<p class="hint">Version 8. Les données restent sur ce téléphone. Si vous effacez les données du navigateur, elles seront perdues.</p>
+<div class="card"><b>Installer sur l’écran d’accueil</b>
+<p class="hint" id="inst">Sur iPhone, ouvrez cette page dans Safari, touchez le bouton Partager (le carré avec une flèche), puis « Sur l’écran d’accueil ». L’application s’ouvrira ensuite comme une vraie application, même sans réseau.</p>
+<p class="msg" id="swmsg" role="status"></p></div>
+<p class="hint">Version 9. Les données restent sur ce téléphone. Si vous effacez les données du navigateur, elles seront perdues.</p>
 </div>
 
 <script>
@@ -1025,6 +1035,11 @@ const rows=recs.map(o=>[fr(o.date),o.type,o.marque,o.couleur,o.plaque,o.etat,LBL
 const t="\ufeff"+[H].concat(rows).map(r=>r.map(q).join(";")).join("\r\n"),a=document.createElement("a");a.href=URL.createObjectURL(new Blob([t],{type:"text/csv;charset=utf-8"}));a.download="vehicules-abandonnes-"+new Date().toISOString().slice(0,10)+".csv";document.body.appendChild(a);a.click();a.remove();m.textContent="Fichier créé. Ouvrez-le avec Numbers, Excel ou l’application Fichiers."};
 
 startWatch();
+/* Hors connexion */
+const offl=()=>{$("#offline").hidden=navigator.onLine};addEventListener("online",offl);addEventListener("offline",offl);offl();
+if("serviceWorker" in navigator&&location.protocol==="https:"){navigator.serviceWorker.register("sw.js").then(()=>navigator.serviceWorker.ready).then(()=>{$("#swmsg").textContent="Mode hors connexion : prêt."}).catch(()=>{$("#swmsg").textContent="Mode hors connexion non disponible sur ce navigateur."})}
+else $("#swmsg").textContent="Le mode hors connexion s’active quand la page est ouverte depuis votre adresse en https.";
+if(navigator.standalone||(window.matchMedia&&matchMedia("(display-mode: standalone)").matches))$("#inst").textContent="L’application est installée sur votre écran d’accueil.";
 openDb().then(refresh);
 </script>
 </body>
